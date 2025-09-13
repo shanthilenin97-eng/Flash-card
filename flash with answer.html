@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Flash Cards</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0b0f21 0%, #1a1f3a 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #6ab7ff;
+            text-shadow: 0 0 10px rgba(106, 183, 255, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a5d0ff;
+            margin-bottom: 2rem;
+        }
+        
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            max-width: 1200px;
+            width: 100%;
+        }
+        
+        .card {
+            width: 300px;
+            height: 200px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+        
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        
+        .card-front {
+            background: linear-gradient(135deg, #3a5e8c 0%, #2b4368 100%);
+            border: 2px solid #6ab7ff;
+        }
+        
+        .card-back {
+            background: linear-gradient(135deg, #6ab7ff 0%, #4facfe 100%);
+            color: #0b0f21;
+            transform: rotateY(180deg);
+        }
+        
+        .card-number {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .question {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .answer {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+        
+        .hint {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .instructions {
+            text-align: center;
+            margin-top: 2rem;
+            color: #a5d0ff;
+            font-size: 1rem;
+            max-width: 600px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                gap: 1.5rem;
+            }
+            
+            .card {
+                width: 280px;
+                height: 180px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                gap: 1rem;
+            }
+            
+            .card {
+                width: 100%;
+                max-width: 300px;
+                height: 160px;
+            }
+            
+            .question {
+                font-size: 1.1rem;
+            }
+            
+            .answer {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Space Explorer Flashcards</h1>
+        <p class="subtitle">Click on a card to reveal the answer</p>
+    </header>
+    
+    <div class="container">
+        <!-- Card 1 -->
+        <div class="card" onclick="flipCard(this)">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="card-number">1</div>
+                    <div class="question">What is the closest planet to the Sun?</div>
+                    <div class="hint">Click to flip</div>
+                </div>
+                <div class="card-back">
+                    <div class="answer">Mercury</div>
+                    <div class="hint">It completes an orbit in just 88 days!</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Card 2 -->
+        <div class="card" onclick="flipCard(this)">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="card-number">2</div>
+                    <div class="question">Which planet has the most extensive ring system?</div>
+                    <div class="hint">Click to flip</div>
+                </div>
+                <div class="card-back">
+                    <div class="answer">Saturn</div>
+                    <div class="hint">Its rings are made mostly of ice particles</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Card 3 -->
+        <div class="card" onclick="flipCard(this)">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="card-number">3</div>
+                    <div class="question">What is the largest planet in our solar system?</div>
+                    <div class="hint">Click to flip</div>
+                </div>
+                <div class="card-back">
+                    <div class="answer">Jupiter</div>
+                    <div class="hint">It's more than twice as massive as all other planets combined</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Card 4 -->
+        <div class="card" onclick="flipCard(this)">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="card-number">4</div>
+                    <div class="question">What is the name of our galaxy?</div>
+                    <div class="hint">Click to flip</div>
+                </div>
+                <div class="card-back">
+                    <div class="answer">Milky Way</div>
+                    <div class="hint">It contains 100-400 billion stars</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Card 5 -->
+        <div class="card" onclick="flipCard(this)">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="card-number">5</div>
+                    <div class="question">What causes the phases of the Moon?</div>
+                    <div class="hint">Click to flip</div>
+                </div>
+                <div class="card-back">
+                    <div class="answer">The changing relative positions of the Earth, Moon, and Sun</div>
+                    <div class="hint">The Moon doesn't produce its own light</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Card 6 -->
+        <div class="card" onclick="flipCard(this)">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="card-number">6</div>
+                    <div class="question">What is a neutron star?</div>
+                    <div class="hint">Click to flip</div>
+                </div>
+                <div class="card-back">
+                    <div class="answer">The collapsed core of a massive star</div>
+                    <div class="hint">A teaspoon of neutron star material would weigh about 10 million tons</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <p>Click on any flashcard to reveal the answer. Click again to flip back to the question.</p>
+        <p>Test your knowledge of space and astronomy with these interactive flashcards!</p>
+    </div>
+
+    <script>
+        function flipCard(card) {
+            card.classList.toggle('flipped');
+        }
+    </script>
+</body>
+</html>
