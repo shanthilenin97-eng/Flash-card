@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>General Knowledge Quiz with Fun Tasks</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 600px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            background: linear-gradient(to right, #6e8efb, #a777e3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .screen {
+            display: none;
+        }
+        
+        #start-screen {
+            display: block;
+        }
+        
+        .question {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #444;
+            line-height: 1.5;
+        }
+        
+        .options {
+            display: grid;
+            grid-gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .option {
+            background-color: #f5f5f5;
+            padding: 15px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #ddd;
+            font-size: 1.1rem;
+            text-align: left;
+            display: flex;
+            align-items: center;
+        }
+        
+        .option:hover {
+            background-color: #e9e9e9;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .option.selected {
+            background-color: #d1ecf1;
+            border-color: #0c5460;
+        }
+        
+        .option.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+        }
+        
+        .option.incorrect {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+        }
+        
+        .task-container {
+            background-color: #fff3cd;
+            border: 2px dashed #ffc107;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: center;
+            border-radius: 12px;
+            display: none;
+        }
+        
+        .task-title {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .task-content {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            background: linear-gradient(to right, #6e8efb, #a777e3);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .score {
+            font-size: 1.3rem;
+            margin: 20px 0;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .progress {
+            height: 12px;
+            background-color: #eee;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #6e8efb, #a777e3);
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        .feedback {
+            font-weight: bold;
+            margin: 20px 0;
+            font-size: 1.3rem;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        
+        .correct-feedback {
+            color: #28a745;
+            background-color: #d4edda;
+        }
+        
+        .incorrect-feedback {
+            color: #dc3545;
+            background-color: #f8d7da;
+        }
+        
+        .emoji {
+            font-size: 2rem;
+            margin: 10px 0;
+        }
+        
+        .option-number {
+            background-color: #6e8efb;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .task-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen">
+            <h1>General Knowledge Quiz</h1>
+            <div class="emoji">🤔 🧠 📚</div>
+            <p>Test your knowledge with these fun questions. If you answer incorrectly, you'll get a hilarious task to complete!</p>
+            <button id="start-btn">Start Quiz</button>
+        </div>
+        
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="screen">
+            <h1>General Knowledge Quiz</h1>
+            <div class="progress">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="question" id="question"></div>
+            <div class="options" id="options"></div>
+            <div class="task-container" id="task-container">
+                <div class="task-emoji" id="task-emoji">😜</div>
+                <div class="task-title">Fun Task Challenge!</div>
+                <div class="task-content" id="task-content"></div>
+                <button id="task-complete-btn">I Did It!</button>
+            </div>
+            <div class="feedback" id="feedback"></div>
+            <button id="next-btn" style="display: none;">Next Question</button>
+            <button id="submit-btn">Submit Answer</button>
+        </div>
+        
+        <!-- Results Screen -->
+        <div id="results-screen" class="screen">
+            <h1>Quiz Completed!</h1>
+            <div class="emoji" id="result-emoji">🎉 🎊 👏</div>
+            <div class="score" id="final-score"></div>
+            <button id="restart-btn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz questions with funny tasks
+        const questions = [
+            {
+                question: "Which of these are primary colors?",
+                options: ["Red", "Blue", "Green", "Purple"],
+                correctAnswers: [0, 1], // Red and Blue
+                task: "Do a silly dance for 10 seconds while making trumpet sounds with your mouth!"
+            },
+            {
+                question: "Which planets are considered gas giants in our solar system?",
+                options: ["Mars", "Jupiter", "Venus", "Saturn"],
+                correctAnswers: [1, 3], // Jupiter and Saturn
+                task: "Pretend you're a balloon inflating and then popping! Inhale deeply and then explode with a 'POP!'"
+            },
+            {
+                question: "Which of these languages are Romance languages?",
+                options: ["English", "Spanish", "French", "German"],
+                correctAnswers: [1, 2], // Spanish and French
+                task: "Sing the alphabet song backwards in your best opera voice!"
+            },
+            {
+                question: "Which of these elements are noble gases?",
+                options: ["Oxygen", "Helium", "Neon", "Carbon"],
+                correctAnswers: [1, 2], // Helium and Neon
+                task: "Talk like you've inhaled helium for 20 seconds (high-pitched voice) and say: 'I am a noble gas!'"
+            },
+            {
+                question: "Which of these countries are in South America?",
+                options: ["Mexico", "Brazil", "Argentina", "Chile"],
+                correctAnswers: [1, 2, 3], // Brazil, Argentina, Chile
+                task: "Act like a monkey for 15 seconds while scratching your head and making monkey sounds!"
+            }
+        ];
+
+        // Task emojis
+        const taskEmojis = ["😜", "🤪", "🎭", "🦍", "🎺", "🤡", "🎪", "🕺", "💃", "🎤"];
+
+        // DOM elements
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const questionElement = document.getElementById('question');
+        const optionsElement = document.getElementById('options');
+        const taskContainer = document.getElementById('task-container');
+        const taskContent = document.getElementById('task-content');
+        const taskEmoji = document.getElementById('task-emoji');
+        const taskCompleteBtn = document.getElementById('task-complete-btn');
+        const feedbackElement = document.getElementById('feedback');
+        const progressBar = document.getElementById('progress-bar');
+        const finalScoreElement = document.getElementById('final-score');
+        const resultEmoji = document.getElementById('result-emoji');
+
+        // Quiz state
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedOptions = [];
+
+        // Initialize the quiz
+        startBtn.addEventListener('click', startQuiz);
+        restartBtn.addEventListener('click', startQuiz);
+        submitBtn.addEventListener('click', checkAnswer);
+        nextBtn.addEventListener('click', nextQuestion);
+        taskCompleteBtn.addEventListener('click', completeTask);
+
+        function startQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            selectedOptions = [];
+            
+            startScreen.style.display = 'none';
+            resultsScreen.style.display = 'none';
+            quizScreen.style.display = 'block';
+            
+            showQuestion();
+        }
+
+        function showQuestion() {
+            resetState();
+            const question = questions[currentQuestion];
+            
+            // Update progress bar
+            progressBar.style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+            
+            questionElement.textContent = question.question;
+            
+            // Create options
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option');
+                
+                const optionNumber = document.createElement('div');
+                optionNumber.classList.add('option-number');
+                optionNumber.textContent = index + 1;
+                
+                const optionText = document.createElement('div');
+                optionText.textContent = option;
+                
+                optionElement.appendChild(optionNumber);
+                optionElement.appendChild(optionText);
+                optionElement.dataset.index = index;
+                optionElement.addEventListener('click', selectOption);
+                optionsElement.appendChild(optionElement);
+            });
+        }
+
+        function resetState() {
+            // Clear previous question and feedback
+            while (optionsElement.firstChild) {
+                optionsElement.removeChild(optionsElement.firstChild);
+            }
+            
+            taskContainer.style.display = 'none';
+            feedbackElement.textContent = '';
+            feedbackElement.className = 'feedback';
+            nextBtn.style.display = 'none';
+            submitBtn.style.display = 'block';
+            selectedOptions = [];
+        }
+
+        function selectOption(e) {
+            const optionElement = e.target.closest('.option');
+            const optionIndex = parseInt(optionElement.dataset.index);
+            
+            // For multiple correct answers, toggle selection
+            if (selectedOptions.includes(optionIndex)) {
+                selectedOptions = selectedOptions.filter(i => i !== optionIndex);
+                optionElement.classList.remove('selected');
+            } else {
+                selectedOptions.push(optionIndex);
+                optionElement.classList.add('selected');
+            }
+        }
+
+        function checkAnswer() {
+            if (selectedOptions.length === 0) {
+                alert('Please select at least one answer!');
+                return;
+            }
+            
+            const question = questions[currentQuestion];
+            const options = Array.from(optionsElement.children);
+            
+            // Disable further selection
+            options.forEach(option => {
+                option.style.pointerEvents = 'none';
+            });
+            
+            // Check if answer is correct
+            const isCorrect = arraysEqual(selectedOptions.sort(), question.correctAnswers.sort());
+            
+            if (isCorrect) {
+                score++;
+                feedbackElement.textContent = 'Correct! Well done!';
+                feedbackElement.classList.add('correct-feedback');
+                
+                // Highlight correct answers
+                question.correctAnswers.forEach(index => {
+                    options[index].classList.add('correct');
+                });
+            } else {
+                feedbackElement.textContent = 'Incorrect!';
+                feedbackElement.classList.add('incorrect-feedback');
+                
+                // Show funny task
+                taskContent.textContent = question.task;
+                taskEmoji.textContent = taskEmojis[Math.floor(Math.random() * taskEmojis.length)];
+                taskContainer.style.display = 'block';
+                
+                // Highlight correct and incorrect answers
+                question.correctAnswers.forEach(index => {
+                    options[index].classList.add('correct');
+                });
+                
+                selectedOptions.forEach(index => {
+                    if (!question.correctAnswers.includes(index)) {
+                        options[index].classList.add('incorrect');
+                    }
+                });
+            }
+            
+            submitBtn.style.display = 'none';
+            nextBtn.style.display = 'block';
+        }
+
+        function completeTask() {
+            taskContainer.style.display = 'none';
+            feedbackElement.textContent += " Task completed! 😄";
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            
+            if (currentQuestion < questions.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizScreen.style.display = 'none';
+            resultsScreen.style.display = 'block';
+            
+            finalScoreElement.textContent = `You scored ${score} out of ${questions.length}!`;
+            
+            // Set result emoji based on score
+            if (score === questions.length) {
+                resultEmoji.textContent = "🎉 🏆 🤩";
+            } else if (score >= questions.length / 2) {
+                resultEmoji.textContent = "🎉 👍 😊";
+            } else {
+                resultEmoji.textContent = "🙂 👏 💪";
+            }
+        }
+
+        // Helper function to compare arrays
+        function arraysEqual(a, b) {
+            if (a.length !== b.length) return false;
+            for (let i = 0; i < a.length; i++) {
+                if (a[i] !== b[i]) return false;
+            }
+            return true;
+        }
+    </script>
+</body>
+</html>
