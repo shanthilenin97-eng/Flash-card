@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Math Brawler</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #111;
+            color: white;
+            font-family: 'Bangers', cursive;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #ui-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .health-bar-container {
+            width: 40%;
+            max-width: 400px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 4px solid #fff;
+            border-radius: 15px;
+            padding: 5px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+        
+        #player-health-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+
+        #opponent-health-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .health-bar {
+            width: 100%;
+            height: 30px;
+            background-color: #c0392b;
+            border-radius: 10px;
+            transform-origin: left;
+            transition: transform 0.5s ease-out;
+        }
+        
+        #player-health {
+             background: linear-gradient(90deg, #2ecc71, #27ae60);
+        }
+        
+        #opponent-health {
+             background: linear-gradient(90deg, #e74c3c, #c0392b);
+        }
+
+        .health-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2rem;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        #math-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            border-radius: 20px;
+            border: 5px solid #f39c12;
+            box-shadow: 0 0 30px rgba(243, 156, 18, 0.7);
+            text-align: center;
+            pointer-events: all;
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        #question {
+            font-size: 3rem;
+            letter-spacing: 3px;
+            color: #f1c40f;
+            text-shadow: 3px 3px 0 #c0392b;
+        }
+        
+        #answer-input {
+            font-family: 'Bangers', cursive;
+            padding: 10px;
+            border-radius: 10px;
+            border: 3px solid #fff;
+            background-color: #333;
+            color: white;
+            font-size: 2rem;
+            text-align: center;
+            width: 80%;
+            margin: 0 auto;
+        }
+        
+        #submit-answer {
+            font-family: 'Bangers', cursive;
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(145deg, #f39c12, #e67e22);
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 5px 0 #d35400;
+        }
+
+        #submit-answer:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 0 #d35400;
+        }
+        
+        #submit-answer:active {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #d35400;
+        }
+
+        #timer {
+            font-size: 1.5rem;
+            color: #ecf0f1;
+        }
+
+        #game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            pointer-events: all;
+            text-align: center;
+        }
+
+        #game-over-text {
+            font-size: 8rem;
+            color: #e74c3c;
+            text-shadow: 5px 5px 0 #fff;
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-30px);}
+            60% {transform: translateY(-15px);}
+        }
+
+        #restart-button {
+             font-family: 'Bangers', cursive;
+            padding: 15px 30px;
+            border-radius: 15px;
+            border: none;
+            background: linear-gradient(145deg, #2ecc71, #27ae60);
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 5px 0 #1e8449;
+            transition: all 0.2s ease;
+        }
+        #restart-button:hover{
+            transform: translateY(-2px);
+            box-shadow: 0 7px 0 #1e8449;
+        }
+
+        #attack-name {
+            position: absolute;
+            top: 75%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 4rem;
+            color: #fff;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            text-shadow: 0 0 10px #f39c12, 0 0 20px #f39c12, 0 0 30px #e74c3c;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="ui-container">
+        <!-- Health Bars -->
+        <div id="player-health-container" class="health-bar-container">
+            <div id="player-health" class="health-bar"><span class="health-text">PLAYER</span></div>
+        </div>
+        <div id="opponent-health-container" class="health-bar-container">
+            <div id="opponent-health" class="health-bar"><span class="health-text">COMPUTER</span></div>
+        </div>
+
+        <div id="attack-name"></div>
+    </div>
+
+    <!-- Math Question Modal -->
+    <div id="math-modal">
+        <div id="question">10 + 5 = ?</div>
+        <div id="timer">Time: 5.00</div>
+        <input type="number" id="answer-input" autofocus>
+        <button id="submit-answer">STRIKE!</button>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="game-over-screen">
+        <div id="game-over-text">YOU WIN!</div>
+        <button id="restart-button">Play Again</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+
+    <script>
+        // --- SCENE SETUP ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a2a3a);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 5, 15);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+
+        // --- LIGHTING ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(10, 20, 5);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.camera.top = 15;
+        directionalLight.shadow.camera.bottom = -15;
+        directionalLight.shadow.camera.left = -15;
+        directionalLight.shadow.camera.right = 15;
+        scene.add(directionalLight);
+        
+        // --- PHYSICS (CANNON.js) ---
+        const world = new CANNON.World();
+        world.gravity.set(0, -20, 0);
+        world.broadphase = new CANNON.NaiveBroadphase();
+        world.solver.iterations = 10;
+        
+        // --- GAME VARIABLES ---
+        let player, opponent;
+        let gameObjects = [];
+        let correctAnswer, questionStartTime, timerInterval;
+        const MAX_HEALTH = 100;
+        let playerHealth = MAX_HEALTH;
+        let opponentHealth = MAX_HEALTH;
+        let gameIsOver = false;
+
+        // --- UI ELEMENTS ---
+        const mathModal = document.getElementById('math-modal');
+        const questionEl = document.getElementById('question');
+        const answerInput = document.getElementById('answer-input');
+        const submitButton = document.getElementById('submit-answer');
+        const timerEl = document.getElementById('timer');
+        const playerHealthBar = document.getElementById('player-health');
+        const opponentHealthBar = document.getElementById('opponent-health');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const gameOverText = document.getElementById('game-over-text');
+        const restartButton = document.getElementById('restart-button');
+        const attackNameEl = document.getElementById('attack-name');
+
+        class Character {
+            constructor(name, color, position, isPlayer = false) {
+                this.name = name;
+                this.isPlayer = isPlayer;
+
+                // Three.js visual setup
+                this.mesh = new THREE.Group();
+                const head = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.5, 32, 32),
+                    new THREE.MeshStandardMaterial({ color: color })
+                );
+                head.position.y = 2.2;
+                const body = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.7, 0.5, 2, 32),
+                    new THREE.MeshStandardMaterial({ color: 0xcccccc })
+                );
+                body.position.y = 1;
+
+                this.mesh.add(head);
+                this.mesh.add(body);
+                this.mesh.traverse(child => {
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });
+                scene.add(this.mesh);
+
+                // Cannon.js physics body
+                this.body = new CANNON.Body({
+                    mass: 80,
+                    position: new CANNON.Vec3(position.x, position.y, position.z),
+                    shape: new CANNON.Cylinder(0.7, 0.7, 2.5, 12),
+                    fixedRotation: true, // Prevent character from tipping over
+                });
+                world.addBody(this.body);
+
+                // Arm for attacks
+                this.arm = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.4, 16, 16),
+                    new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0x550000 })
+                );
+                this.arm.position.set(isPlayer ? 1 : -1, 1.5, 0.5);
+                this.mesh.add(this.arm);
+
+                gameObjects.push(this);
+            }
+            
+            update() {
+                this.mesh.position.copy(this.body.position);
+                this.mesh.quaternion.copy(this.body.quaternion);
+            }
+        }
+        
+        function initGame() {
+            // Reset health
+            playerHealth = MAX_HEALTH;
+            opponentHealth = MAX_HEALTH;
+            updateHealthBars();
+            gameIsOver = false;
+
+            // Clear previous characters if they exist
+            if (player) {
+                scene.remove(player.mesh);
+                world.removeBody(player.body);
+            }
+            if (opponent) {
+                scene.remove(opponent.mesh);
+                world.removeBody(opponent.body);
+            }
+            gameObjects = [];
+            
+            // Create characters
+            player = new Character('Player', 0x3498db, { x: -4, y: 5, z: 0 }, true);
+            opponent = new Character('Opponent', 0xe74c3c, { x: 4, y: 5, z: 0 });
+
+            // Ground
+            const groundShape = new CANNON.Plane();
+            const groundBody = new CANNON.Body({ mass: 0, shape: groundShape });
+            groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+            world.addBody(groundBody);
+
+            const groundMesh = new THREE.Mesh(
+                new THREE.PlaneGeometry(100, 100),
+                new THREE.MeshStandardMaterial({ color: 0x444444, side: THREE.DoubleSide })
+            );
+            groundMesh.rotation.x = -Math.PI / 2;
+            groundMesh.receiveShadow = true;
+            scene.add(groundMesh);
+            
+            // Ring
+            const ringGeo = new THREE.RingGeometry(10, 11, 64);
+            const ringMat = new THREE.MeshStandardMaterial({color: 0xf39c12, side: THREE.DoubleSide});
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = -Math.PI / 2;
+            ring.position.y = 0.01;
+            scene.add(ring);
+
+
+            // Start first turn
+            setTimeout(askQuestion, 2000);
+        }
+
+        // --- GAME LOGIC ---
+        function askQuestion() {
+            if (gameIsOver) return;
+
+            const num1 = Math.floor(Math.random() * 10) + 1;
+            const num2 = Math.floor(Math.random() * 10) + 1;
+            correctAnswer = num1 + num2;
+            questionEl.textContent = `${num1} + ${num2} = ?`;
+            answerInput.value = '';
+
+            mathModal.style.display = 'flex';
+            answerInput.focus();
+
+            // Timer
+            let timeLeft = 5;
+            questionStartTime = new Date().getTime();
+            timerEl.textContent = `Time: ${timeLeft.toFixed(2)}`;
+            timerInterval = setInterval(() => {
+                timeLeft -= 0.01;
+                timerEl.textContent = `Time: ${Math.max(0, timeLeft).toFixed(2)}`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    checkAnswer(true); // Timeout counts as wrong answer
+                }
+            }, 10);
+        }
+        
+        function checkAnswer(timedOut = false) {
+            clearInterval(timerInterval);
+            const timeTaken = (new Date().getTime() - questionStartTime) / 1000;
+            const playerAnswer = parseInt(answerInput.value);
+
+            let power = 0;
+            if (!timedOut && playerAnswer === correctAnswer) {
+                // Higher power for faster correct answers
+                power = Math.max(1, 30 - (timeTaken * 5));
+            }
+
+            mathModal.style.display = 'none';
+            playerAttack(power);
+        }
+
+        function playerAttack(power) {
+            if (power > 0) {
+                const attacks = [
+                    { name: "GUM-GUM PISTOL!", animation: gumGumPistol },
+                    { name: "ONI GIRI!", animation: oniGiri },
+                    { name: "DIABLE JAMBE!", animation: diableJambe }
+                ];
+                const attack = attacks[Math.floor(Math.random() * attacks.length)];
+                
+                showAttackName(attack.name);
+                attack.animation(player, opponent, power);
+                
+                updateHealth('opponent', power);
+            } else {
+                 showAttackName("MISS!");
+            }
+            
+            if (opponentHealth > 0) {
+                setTimeout(computerAttack, 3000);
+            }
+        }
+
+        function computerAttack() {
+            if (gameIsOver) return;
+            const power = Math.floor(Math.random() * 15) + 5; // Computer power is random
+            showAttackName("COUNTER STRIKE!");
+            
+            // Simple lunge animation for computer
+            gsap.to(opponent.body.position, {
+                x: player.body.position.x + 1.5,
+                duration: 0.2,
+                onComplete: () => {
+                    const impulse = new CANNON.Vec3(-power * 5, power * 2, 0);
+                    const worldPoint = new CANNON.Vec3(player.body.position.x, player.body.position.y + 1, player.body.position.z);
+                    player.body.applyImpulse(impulse, worldPoint);
+                    gsap.to(opponent.body.position, { x: 4, duration: 1, ease: 'power2.out' });
+                }
+            });
+
+            updateHealth('player', power);
+            if (playerHealth > 0) {
+                setTimeout(askQuestion, 2000);
+            }
+        }
+
+        function updateHealth(target, damage) {
+            damage = Math.round(damage);
+            if (target === 'player') {
+                playerHealth = Math.max(0, playerHealth - damage);
+            } else {
+                opponentHealth = Math.max(0, opponentHealth - damage);
+            }
+            updateHealthBars();
+            
+            if (playerHealth === 0 || opponentHealth === 0) {
+                endGame();
+            }
+        }
+
+        function updateHealthBars() {
+            playerHealthBar.style.transform = `scaleX(${playerHealth / MAX_HEALTH})`;
+            opponentHealthBar.style.transform = `scaleX(${opponentHealth / MAX_HEALTH})`;
+        }
+        
+        function showAttackName(name) {
+            attackNameEl.textContent = name;
+            gsap.fromTo(attackNameEl, { opacity: 1, y: 0 }, { opacity: 0, y: -50, duration: 2, delay: 0.5 });
+        }
+
+        function endGame() {
+            gameIsOver = true;
+            mathModal.style.display = 'none';
+            gameOverScreen.style.display = 'flex';
+            if (playerHealth === 0) {
+                gameOverText.textContent = "YOU LOSE!";
+            } else {
+                gameOverText.textContent = "YOU WIN!";
+            }
+        }
+
+        // --- ATTACK ANIMATIONS ---
+        function gumGumPistol(attacker, target, power) {
+            const originalScale = attacker.arm.scale.clone();
+            gsap.to(attacker.arm.scale, {
+                z: 15,
+                duration: 0.2,
+                onComplete: () => {
+                    const impulse = new CANNON.Vec3(power * (attacker.isPlayer ? 1 : -1) * 5, power * 2, 0);
+                    const worldPoint = new CANNON.Vec3(target.body.position.x, target.body.position.y + 1, target.body.position.z);
+                    target.body.applyImpulse(impulse, worldPoint);
+                    
+                    gsap.to(attacker.arm.scale, {
+                        z: originalScale.z,
+                        duration: 0.5,
+                        ease: 'elastic.out(1, 0.3)'
+                    });
+                }
+            });
+        }
+        
+        function oniGiri(attacker, target, power) {
+            const originalPos = attacker.body.position.clone();
+            const targetPos = target.body.position.clone();
+            const dashPastPos = new CANNON.Vec3(targetPos.x + (attacker.isPlayer ? 3 : -3), originalPos.y, originalPos.z);
+
+            gsap.to(attacker.body.position, {
+                x: dashPastPos.x,
+                duration: 0.3,
+                ease: 'power2.in',
+                onComplete: () => {
+                    const impulse = new CANNON.Vec3(power * (attacker.isPlayer ? 1 : -1) * 3, power * 4, 0);
+                    const worldPoint = new CANNON.Vec3(target.body.position.x, target.body.position.y + 1.5, target.body.position.z);
+                    target.body.applyImpulse(impulse, worldPoint);
+                    gsap.to(attacker.body.position, { x: originalPos.x, duration: 1, ease: 'power2.out' });
+                }
+            });
+        }
+        
+        function diableJambe(attacker, target, power) {
+            const originalColor = attacker.arm.material.color.getHex();
+            gsap.to(attacker.arm.material.color, { r:1, g:0.2, b:0, duration: 0.5 });
+            gsap.to(attacker.arm.material, {emissiveIntensity: 5, duration: 0.5});
+            
+            const originalPos = attacker.body.position.clone();
+            gsap.to(attacker.body.position, {
+                y: originalPos.y + 3,
+                duration: 0.3,
+                ease: 'power1.inOut',
+                onComplete: () => {
+                     gsap.to(attacker.body.position, {
+                        x: target.body.position.x,
+                        y: originalPos.y,
+                        duration: 0.2,
+                        ease: 'power2.in',
+                        onComplete: () => {
+                            const impulse = new CANNON.Vec3(0, power * 5, power * (attacker.isPlayer ? 1 : -1) * 3);
+                            const worldPoint = new CANNON.Vec3(target.body.position.x, target.body.position.y + 2, target.body.position.z);
+                            target.body.applyImpulse(impulse, worldPoint);
+                            
+                            gsap.to(attacker.body.position, {x: originalPos.x, duration: 1});
+                            gsap.to(attacker.arm.material.color, { r:1, g:0, b:0, duration: 2 });
+                            gsap.to(attacker.arm.material, {emissiveIntensity: 1, duration: 2});
+                        }
+                    });
+                }
+            });
+        }
+
+
+        // --- EVENT LISTENERS ---
+        submitButton.addEventListener('click', () => checkAnswer());
+        answerInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') checkAnswer();
+        });
+        restartButton.addEventListener('click', () => {
+             gameOverScreen.style.display = 'none';
+             initGame();
+        });
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // --- RENDER LOOP ---
+        const clock = new THREE.Clock();
+        let oldElapsedTime = 0;
+        function animate() {
+            if (gameIsOver && player.body.position.y < -10) {
+                 // Stop physics updates if player falls off after loss
+            } else {
+                 const elapsedTime = clock.getElapsedTime();
+                const deltaTime = elapsedTime - oldElapsedTime;
+                oldElapsedTime = elapsedTime;
+                world.step(1 / 60, deltaTime, 3);
+            }
+            
+            gameObjects.forEach(obj => obj.update());
+            
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+
+        initGame();
+        animate();
+    </script>
+</body>
+</html>
